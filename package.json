@@ -1,0 +1,19 @@
+{
+  "name": "nodejs",
+  "version": "1.0.0",
+  "description": "Nodejs file system",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "file"
+  ],
+  "author": "rishi",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.1",
+    "nodejs": "file:"
+  }
+}
