@@ -1,47 +1,53 @@
+// Import required modules
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const cors = require('cors');
+
+// Initialize Express app
 const app = express();
 const port = 3000;
 
-// Enable CORS
-app.use(cors());
+// Folder where text files will be stored
+const folderPath = path.join(__dirname, 'textFiles');
 
-// Folder to store text files
-const folderPath = path.join(__dirname, 'files');
-
-// Ensure the folder exists
+// Make sure the folder exists
 if (!fs.existsSync(folderPath)) {
-  fs.mkdirSync(folderPath);
+    fs.mkdirSync(folderPath);
 }
 
-// API to create a text file with current timestamp
-app.get('/create-file', (req, res) => {
-  const currentDate = new Date();
-  const filename = `${currentDate.toISOString()}.txt`;
-  const filePath = path.join(folderPath, filename);
-  const content = `Timestamp: ${currentDate.toISOString()}`;
+// Middleware to parse JSON request body (if needed)
+app.use(express.json());
 
-  fs.writeFile(filePath, content, (err) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error creating file', error: err });
-    }
-    res.status(200).json({ message: 'File created successfully', filename });
-  });
+// Endpoint 1: Create a text file with the current timestamp
+app.post('/create-file', (req, res) => {
+    const currentDateTime = new Date().toISOString();
+    const fileName = `${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;  // Replace colons and dots in the file name
+    const filePath = path.join(folderPath, fileName);
+
+    // Write the timestamp into the text file
+    fs.writeFile(filePath, currentDateTime, (err) => {
+        if (err) {
+            return res.status(500).send('Error writing file');
+        }
+        res.status(201).send({ message: `File created successfully: ${fileName}` });
+    });
 });
 
-// API to retrieve all text files in the folder
+// Endpoint 2: Retrieve all text files in the folder
 app.get('/get-files', (req, res) => {
-  fs.readdir(folderPath, (err, files) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error reading files', error: err });
-    }
-    const txtFiles = files.filter(file => file.endsWith('.txt'));
-    res.status(200).json({ files: txtFiles });
-  });
+    fs.readdir(folderPath, (err, files) => {
+        if (err) {
+            return res.status(500).send('Error reading files');
+        }
+
+        // Filter text files only
+        const textFiles = files.filter(file => file.endsWith('.txt'));
+
+        res.status(200).json(textFiles);
+    });
 });
 
+// Start the server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running on http://localhost:${port}`);
 });
